@@ -1,11 +1,11 @@
 const LocalStrategy = require('passport-local').Strategy;
 const bcrypt = require("bcrypt");
-const mysql = require('mysql');
-
+// const mysql = require('mysql');
 
 function initialize(connection, passport) {
   const authenticateUser = async (username, password, done) => {
-    connection.query('SELECT * FROM accounts WHERE username = ?', [username], async function(error, results, fields) {
+    connection.query('SELECT * FROM accounts WHERE username = $1', [username], async function(error, results, fields) {
+      console.log(results);
       if (results.length > 0) {
         try {
           if (await bcrypt.compare(password, results[0].password)) {
@@ -35,7 +35,7 @@ function initialize(connection, passport) {
     passwordField: "password"
   }, authenticateUser));
   passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser((id, done) => connection.query("select * from accounts where id = ?", [id], function(err, results) {
+  passport.deserializeUser((id, done) => connection.query("select * from accounts where id = $1", [id], function(err, results) {
     done(err, results[0]);
   }));
 

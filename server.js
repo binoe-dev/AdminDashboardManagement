@@ -1,6 +1,6 @@
 require("dotenv").config();
 
-var mysql = require('mysql');
+const { Client  } = require('pg');
 var express = require('express');
 var session = require('express-session');
 const flash = require('express-flash');
@@ -32,14 +32,36 @@ const {
   createNewUser
 } = require("./queries.js");
 
-var connection = mysql.createPool({
-  host: process.env.DB_HOST,
-  user: process.env.DB_USER,
-  password: process.env.DB_PASSWORD,
-  database: process.env.DATABASE,
-  multipleStatements: true,
-  timezone: 'utc'
+// Connect PostgreSQL with Option
+// var connection = postgres.createPool({
+//   host: process.env.DB_HOST,
+//   user: process.env.DB_USER,
+//   password: process.env.DB_PASSWORD,
+//   database: process.env.DATABASE,
+//   multipleStatements: true,
+//   timezone: 'utc'
+// });
+
+// Connect PostgreSQL with URL
+const connectionString = process.env.POSTGRES_URL
+
+const sslConfig = {
+  ssl: {
+    rejectUnauthorized: false, 
+  },
+};
+const connection = new Client ({
+  connectionString: connectionString,
+  ...sslConfig,
 });
+
+connection.connect()
+  .then(() => {
+    console.log('Connected to PostgreSQL');
+  })
+  .catch(error => {
+    console.error('Connection error', error);
+  });
 
 // CONFIGURING OPTIONS
 const corsOptions = {
